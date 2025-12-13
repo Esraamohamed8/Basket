@@ -1,0 +1,682 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+    <title>سلة النِعَم — اللعبة</title>
+    <!-- Bootstrap 5 CDN -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
+
+    <style>
+      :root {
+        --bg: linear-gradient(135deg, #e0f7fa 0%, #bbdefb 100%);
+        --card: #ffffff;
+        --accent: #ffd54f;
+        --primary: #4a6572;
+        --success: #43a047;
+        --error: #e53935;
+        --text: #263238;
+      }
+      
+      body {
+        background: var(--bg);
+        font-family: 'Cairo', 'Segoe UI', Tahoma, Helvetica, Arial, sans-serif;
+        color: var(--text);
+        min-height: 100vh;
+      }
+      
+      .game-area {
+        max-width: 980px;
+        margin: 24px auto;
+        padding: 16px;
+      }
+      
+      .item-card {
+        height: 140px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 48px;
+        border-radius: 20px;
+        cursor: grab;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        position: relative;
+        overflow: hidden;
+      }
+      
+      .item-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 16px rgba(0,0,0,0.15);
+      }
+      
+      .item-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: var(--accent);
+        transform: scaleX(0);
+        transition: transform 0.3s ease;
+      }
+      
+      .item-card:hover::before {
+        transform: scaleX(1);
+      }
+      
+      .basket {
+        height: 180px;
+        width: 180px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 64px;
+        background: linear-gradient(135deg, #fff6e0, #ffecb3);
+        box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+        transition: all 0.3s ease;
+        border: 4px dashed transparent;
+        position: relative;
+      }
+      
+      .basket::after {
+        content: '';
+        position: absolute;
+        top: -10px;
+        left: -10px;
+        right: -10px;
+        bottom: -10px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, rgba(255,213,79,0.2), rgba(255,167,38,0.2));
+        z-index: -1;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+      }
+      
+      .basket:hover::after {
+        opacity: 1;
+      }
+      
+      .drop-over {
+        transform: scale(1.05);
+        border-color: rgba(255,167,38,0.5) !important;
+        box-shadow: 0 15px 30px rgba(255,167,38,0.3);
+      }
+      
+      .message {
+        min-height: 48px;
+        transition: all 0.3s ease;
+      }
+      
+      .rtl-text {
+        direction: rtl;
+        text-align: center;
+      }
+      
+      .items-grid {
+        gap: 16px;
+      }
+      
+      .game-title {
+        color: var(--primary);
+        font-weight: 700;
+        text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        position: relative;
+        display: inline-block;
+        margin-bottom: 20px;
+      }
+      
+      .game-title::after {
+        content: '';
+        position: absolute;
+        bottom: -8px;
+        right: 0;
+        width: 60%;
+        height: 4px;
+        background: var(--accent);
+        border-radius: 2px;
+      }
+      
+      .start-screen {
+        background: linear-gradient(135deg, rgba(255,255,255,0.9), rgba(255,255,255,0.7));
+        backdrop-filter: blur(10px);
+        border-radius: 24px;
+        padding: 40px 20px;
+        box-shadow: 0 15px 30px rgba(0,0,0,0.1);
+        border: 1px solid rgba(255,255,255,0.5);
+      }
+      
+      .start-btn {
+        background: linear-gradient(135deg, var(--primary), #5d7987);
+        border: none;
+        border-radius: 50px;
+        padding: 12px 40px;
+        font-weight: 600;
+        font-size: 18px;
+        box-shadow: 0 8px 15px rgba(0,0,0,0.1);
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+      }
+      
+      .start-btn:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 12px 20px rgba(0,0,0,0.15);
+      }
+      
+      .start-btn::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(rgba(255,255,255,0.2), transparent);
+        transform: translateY(100%);
+        transition: transform 0.3s ease;
+      }
+      
+      .start-btn:hover::after {
+        transform: translateY(0);
+      }
+      
+      .game-card {
+        background: linear-gradient(135deg, rgba(255,255,255,0.9), rgba(255,255,255,0.7));
+        backdrop-filter: blur(10px);
+        border-radius: 24px;
+        box-shadow: 0 15px 30px rgba(0,0,0,0.1);
+        border: 1px solid rgba(255,255,255,0.5);
+        overflow: hidden;
+      }
+      
+      .collected-item {
+        background: white;
+        border-radius: 12px;
+        padding: 8px 12px;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.08);
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 18px;
+      }
+      
+      .collected-item:hover {
+        transform: scale(1.05);
+        box-shadow: 0 6px 12px rgba(0,0,0,0.12);
+      }
+      
+      .reset-btn {
+        background: transparent;
+        border: 2px solid var(--primary);
+        color: var(--primary);
+        border-radius: 50px;
+        padding: 10px 30px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+      }
+      
+      .reset-btn:hover {
+        background: var(--primary);
+        color: white;
+        transform: translateY(-2px);
+        box-shadow: 0 6px 12px rgba(0,0,0,0.1);
+      }
+      
+      .congrats-modal {
+        background: linear-gradient(135deg, rgba(255,255,255,0.95), rgba(255,255,255,0.85));
+        backdrop-filter: blur(10px);
+        border-radius: 24px;
+        border: 1px solid rgba(255,255,255,0.5);
+      }
+      
+      .congrats-btn {
+        background: linear-gradient(135deg, var(--success), #4caf50);
+        border: none;
+        border-radius: 50px;
+        padding: 10px 30px;
+        font-weight: 600;
+        box-shadow: 0 6px 12px rgba(0,0,0,0.1);
+        transition: all 0.3s ease;
+      }
+      
+      .congrats-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 15px rgba(0,0,0,0.15);
+      }
+      
+      .success-message {
+        background: linear-gradient(135deg, rgba(76,175,80,0.1), rgba(76,175,80,0.05));
+        border-radius: 12px;
+        border-right: 4px solid var(--success);
+      }
+      
+      .error-message {
+        background: linear-gradient(135deg, rgba(229,57,53,0.1), rgba(229,57,53,0.05));
+        border-radius: 12px;
+        border-right: 4px solid var(--error);
+      }
+      
+      @media (max-width: 576px) {
+        .item-card {
+          height: 100px;
+          font-size: 36px;
+        }
+        
+        .basket {
+          height: 140px;
+          width: 140px;
+          font-size: 48px;
+        }
+        
+        .game-title {
+          font-size: 24px;
+        }
+      }
+      
+      /* Animation for collected items */
+      @keyframes bounceIn {
+        0% { transform: scale(0.3); opacity: 0; }
+        50% { transform: scale(1.05); }
+        70% { transform: scale(0.9); }
+        100% { transform: scale(1); opacity: 1; }
+      }
+      
+      .bounce-in {
+        animation: bounceIn 0.6s ease;
+      }
+      
+      /* Floating animation for items */
+      @keyframes float {
+        0% { transform: translateY(0px); }
+        50% { transform: translateY(-10px); }
+        100% { transform: translateY(0px); }
+      }
+      
+      .floating {
+        animation: float 5s ease-in-out infinite;
+      }
+      
+      /* Particle effect for correct answers */
+      .particle {
+        position: absolute;
+        pointer-events: none;
+        opacity: 0;
+      }
+      
+      @keyframes particle-animation {
+        0% {
+          transform: translate(0, 0) rotate(0deg);
+          opacity: 1;
+        }
+        100% {
+          transform: translate(var(--tx), var(--ty)) rotate(var(--r));
+          opacity: 0;
+        }
+      }
+      
+      /* Loading indicator for speech */
+      .speech-loading {
+        display: inline-block;
+        width: 20px;
+        height: 20px;
+        border: 3px solid rgba(255,255,255,.3);
+        border-radius: 50%;
+        border-top-color: #fff;
+        animation: spin 1s ease-in-out infinite;
+        margin-right: 10px;
+      }
+      
+      @keyframes spin {
+        to { transform: rotate(360deg); }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="game-area p-3">
+      <!-- Start Screen -->
+      <div id="startScreen" class="start-screen text-center p-4">
+        <h1 class="game-title mb-4">سلة النِعَم</h1>
+        <p class="mb-4 text-muted fs-5">لعبة تفاعلية لتعليم الأطفال الامتنان للنعم</p>
+        <button id="startBtn" class="start-btn btn btn-primary btn-lg text-white">ابدأ اللعبة</button>
+      </div>
+
+      <!-- Game Screen (hidden until start) -->
+      <div id="gameScreen" class="game-card p-4 d-none">
+        <div class="card-body">
+          <h1 class="game-title text-center mb-2">سلة النِعَم</h1>
+          <p class="text-center text-muted mb-4">اسحب الأشياء المفيدة وضعها في السلة</p>
+
+          <div class="row g-4 align-items-center">
+            <div class="col-12 col-md-8">
+              <div class="row row-cols-3 row-cols-sm-4 row-cols-md-3 items-grid" id="itemsContainer"></div>
+            </div>
+
+            <div class="col-12 col-md-4 text-center">
+              <div id="basket" class="basket mx-auto floating" ondragover="event.preventDefault()">
+                <img src="basket.png">
+              </div>
+              <div class="message mt-4" id="message"></div>
+
+              <div class="card mt-4 p-3" style="border-radius:16px; background: rgba(255,255,255,0.7);">
+                <div class="card-body">
+                  <h6 class="fw-bold mb-3">النعَم التي جمعتها:</h6>
+                  <div id="collected" class="d-flex flex-wrap gap-2 justify-content-center mt-2"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Congrats Popup -->
+      <div class="modal fade" id="congratsModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+          <div class="modal-content congrats-modal text-center p-5">
+            <h3 class="mb-3 text-success">🎉 أحسنت! جمعت كل النِعَم!</h3>
+            <p class="mb-4">أنت ممتن للنعم التي منحك الله إياها</p>
+            <button id="resetBtn" class="reset-btn" data-bs-dismiss="modal">إعادة اللعب</button>
+          </div>
+        </div>
+      </div>
+
+    </main>
+
+    <!-- Bootstrap JS bundle -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+      // بيانات العناصر: isBlessing true => نعمة
+      const ITEMS = [
+        { id:1, label:'تفاح', emoji:'🍎', isBlessing:true, praise:'الحمد لله على التفاح' },
+        { id:2, label:'لعبة', emoji:'🧸', isBlessing:true, praise:'الحمد لله على اللعبه' },
+        { id:3, label:'صرصور', emoji:'🐞', isBlessing:false },
+        { id:4, label:'كتاب', emoji:'📚', isBlessing:true, praise:'الحمد لله على العلم' },
+        { id:5, label:'ماء', emoji:'💧', isBlessing:true, praise:'الحمد لله على الماء' },
+        { id:6, label:'حجر', emoji:'🧱', isBlessing:false },
+        { id:7, label:'أم', emoji:'👩', isBlessing:true, praise:'الحمد لله على الأم' },
+        { id:8, label:'وردة', emoji:'🌸', isBlessing:true, praise:'الحمد لله على الأزهار' },
+        { id:9, label:'دودة', emoji:'🐛', isBlessing:false },
+        { id:10, label:'ارنب', emoji:'🐇', isBlessing:true, praise:'الحمد لله على الحيوانات الاليفه' },
+      ];
+
+      const itemsContainer = document.getElementById('itemsContainer');
+      const basket = document.getElementById('basket');
+      const message = document.getElementById('message');
+      const collected = document.getElementById('collected');
+      const resetBtn = document.getElementById('resetBtn');
+
+      // متغيرات لتتبع حالة التحدث
+      let isSpeaking = false;
+
+      // تحميل العناصر بصريًا
+      function renderItems(){
+        itemsContainer.innerHTML = '';
+        ITEMS.forEach(item => {
+          const col = document.createElement('div');
+          col.className = 'col';
+
+          const card = document.createElement('div');
+          card.className = 'item-card bg-white p-3';
+          card.setAttribute('draggable','true');
+          card.setAttribute('role','button');
+          card.setAttribute('aria-label', item.label);
+          card.dataset.id = item.id;
+
+          // المحتوى: ايموجي + تسمية صغيرة
+          card.innerHTML = `
+            <div class="d-flex flex-column align-items-center">
+              <div class="emoji">${item.emoji}</div>
+              <small class="text-muted mt-2 fw-medium">${item.label}</small>
+            </div>
+          `;
+
+          // سلوك السحب
+          card.addEventListener('dragstart', (e)=>{
+            e.dataTransfer.setData('text/plain', item.id);
+            // small visual
+            requestAnimationFrame(()=> {
+              card.style.opacity = '0.6';
+              card.style.transform = 'scale(0.95)';
+            });
+          });
+          
+          card.addEventListener('dragend', ()=> {
+            card.style.opacity = '1';
+            card.style.transform = 'scale(1)';
+          });
+
+          // Allow tapping on mobile to 'select' and then tap basket
+          card.addEventListener('click', ()=>{
+            // store a temporary selected id
+            document.documentElement.dataset.selected = item.id;
+            flashMessage('اختر السلة لإسقاط العنصر أو اسحب العنصر إليها', false);
+          });
+
+          col.appendChild(card);
+          itemsContainer.appendChild(col);
+        });
+      }
+
+      // إنشاء تأثير الجسيمات
+      function createParticles(x, y, count = 10) {
+        for (let i = 0; i < count; i++) {
+          const particle = document.createElement('div');
+          particle.className = 'particle';
+          particle.innerHTML = '✨';
+          particle.style.position = 'fixed';
+          particle.style.left = x + 'px';
+          particle.style.top = y + 'px';
+          particle.style.fontSize = '20px';
+          particle.style.zIndex = '1000';
+          particle.style.pointerEvents = 'none';
+          
+          // إعداد متغيرات CSS عشوائية للحركة
+          const tx = (Math.random() - 0.5) * 200;
+          const ty = (Math.random() - 0.5) * 200;
+          const r = Math.random() * 360;
+          
+          particle.style.setProperty('--tx', `${tx}px`);
+          particle.style.setProperty('--ty', `${ty}px`);
+          particle.style.setProperty('--r', `${r}deg`);
+          
+          document.body.appendChild(particle);
+          
+          // تشغيل الرسوم المتحركة
+          particle.style.animation = `particle-animation 1s ease-out forwards`;
+          
+          // إزالة الجسيم بعد انتهاء الرسوم المتحركة
+          setTimeout(() => {
+            if (particle.parentNode) {
+              particle.parentNode.removeChild(particle);
+            }
+          }, 1000);
+        }
+      }
+
+      // صوت لطيف للخطأ (short beep using WebAudio)
+      function playErrorTone(){
+        try{
+          const ctx = new (window.AudioContext || window.webkitAudioContext)();
+          const o = ctx.createOscillator();
+          const g = ctx.createGain();
+          o.type = 'sine'; o.frequency.value = 330;
+          g.gain.value = 0.06;
+          o.connect(g); g.connect(ctx.destination);
+          o.start();
+          setTimeout(()=>{ o.stop(); ctx.close(); }, 220);
+        }catch(e){ /* ignore */ }
+      }
+
+      // استخدام Web Speech API لنطق عبارات الشكر إذا متاحة
+      function speakArabic(text, onEndCallback = null){
+        if('speechSynthesis' in window){
+          isSpeaking = true;
+          
+          // عرض مؤشر التحميل أثناء التحدث
+          const loadingIndicator = document.createElement('span');
+          loadingIndicator.className = 'speech-loading';
+          const messageDiv = message.querySelector('div');
+          if(messageDiv) messageDiv.prepend(loadingIndicator);
+          
+          const utter = new SpeechSynthesisUtterance(text);
+          utter.lang = 'ar-SA';
+          utter.rate = 0.95;
+          
+          utter.onend = function() {
+            isSpeaking = false;
+            // إزالة مؤشر التحميل
+            if (loadingIndicator.parentNode) {
+              loadingIndicator.parentNode.removeChild(loadingIndicator);
+            }
+            
+            if (onEndCallback) onEndCallback();
+          };
+          
+          utter.onerror = function() {
+            isSpeaking = false;
+            // إزالة مؤشر التحميل في حالة الخطأ
+            if (loadingIndicator.parentNode) {
+              loadingIndicator.parentNode.removeChild(loadingIndicator);
+            }
+            
+            if (onEndCallback) onEndCallback();
+          };
+          
+          speechSynthesis.cancel();
+          speechSynthesis.speak(utter);
+        } else {
+          // إذا لم يكن Web Speech API مدعومًا، استدعي callback فورًا
+          if (onEndCallback) onEndCallback();
+        }
+      }
+
+      // عرض نافذة التهنئة
+      function showCongratsModal() {
+        const modal = new bootstrap.Modal(document.getElementById('congratsModal'));
+        modal.show();
+      }
+
+      // رسالة مرئية
+      function flashMessage(text, success=true){
+        message.innerHTML = `<div class="p-3 rounded-3 ${success? 'success-message text-success' : 'error-message text-danger'} fw-medium">${text}</div>`;
+      }
+
+      // إسقاط العنصر على السلة
+      basket.addEventListener('dragover', (e)=>{
+        e.preventDefault();
+        basket.classList.add('drop-over');
+      });
+      
+      basket.addEventListener('dragleave', ()=> basket.classList.remove('drop-over'));
+
+      basket.addEventListener('drop', (e)=>{
+        e.preventDefault();
+        basket.classList.remove('drop-over');
+        const id = Number(e.dataTransfer.getData('text/plain'));
+        handleSelection(id);
+      });
+
+      // دعم النقر: إذا اختار الطفل عنصرًا باللمس ثم نقر السلة
+      basket.addEventListener('click', ()=>{
+        const sid = Number(document.documentElement.dataset.selected);
+        if(sid) handleSelection(sid);
+      });
+
+      // التعامل مع العنصر المختار
+      function handleSelection(id){
+        const item = ITEMS.find(i => i.id === id);
+        if(!item) return;
+
+        // find the dragged element and remove it when correct
+        const card = document.querySelector(`[data-id="${id}"]`);
+
+        if(item.isBlessing){
+          if(card) {
+            // إضافة تأثير اختفاء سلس
+            card.style.transition = 'all 0.5s ease';
+            card.style.transform = 'scale(0)';
+            card.style.opacity = '0';
+            
+            setTimeout(() => {
+              if(card.parentElement) card.parentElement.remove();
+            }, 500);
+          }
+
+          const chip = document.createElement('div');
+          chip.className = 'collected-item bounce-in';
+          chip.innerHTML = `<span>${item.emoji}</span>`;
+          collected.appendChild(chip);
+
+          const text = item.praise || `الحمد لله على ${item.label}`;
+          flashMessage(text, true);
+          
+          // إنشاء تأثير الجسيمات
+          const basketRect = basket.getBoundingClientRect();
+          createParticles(
+            basketRect.left + basketRect.width / 2,
+            basketRect.top + basketRect.height / 2,
+            12
+          );
+
+          const totalBlessings = ITEMS.filter(i => i.isBlessing).length;
+          const current = collected.children.length;
+
+          // إذا كانت هذه هي النعمة الأخيرة
+          if(current === totalBlessings){
+            // أولاً: قل عبارة الحمد للبطاقة الأخيرة
+            // ثانياً: بعد الانتهاء، قل رسالة التهنئة النهائية
+            // ثالثاً: اعرض نافذة التهنئة
+            speakArabic(text, function() {
+              // بعد الانتهاء من قول عبارة الحمد للبطاقة الأخيرة
+              flashMessage('جمعت كل النعم!', true);
+              speakArabic('ممتاز! لقد جَمَعْتَ كلَّ النِّعَمِ. أنتَ مُمتَنٌّ لِلنِّعَمِ التي مَنَحَكَ اللهُ إِيَّاها.', showCongratsModal);
+            });
+          } else {
+            // إذا لم تكن النعمة الأخيرة، تحدث كالمعتاد
+            speakArabic(text);
+          }
+        } else {
+          flashMessage('هذه ليست نعمة، جرّب مرة أخرى!', false);
+          playErrorTone();
+          speakArabic('هذه ليست نعمة، جرّب مرة أخرى');
+        }
+
+        delete document.documentElement.dataset.selected;
+      }
+
+      resetBtn.addEventListener('click', ()=>{
+        collected.innerHTML = '';
+        message.innerHTML = '';
+        isSpeaking = false;
+        renderItems();
+        // cancel speech
+        if(window.speechSynthesis) speechSynthesis.cancel();
+      });
+
+      // Start + Audio
+      const startScreen = document.getElementById('startScreen');
+      const gameScreen = document.getElementById('gameScreen');
+      const startBtn = document.getElementById('startBtn');
+
+      // استخدام صوت بديل إذا لم يكن start.mp3 موجودًا
+      const startSound = new Audio();
+      startSound.src = 'https://assets.mixkit.co/sfx/preview/mixkit-winning-chimes-2015.mp3';
+      
+      startBtn?.addEventListener('click', () => {
+        startSound.currentTime = 0;
+        startSound.play().catch(e => console.log("Audio play failed:", e));
+        startScreen.classList.add('d-none');
+        gameScreen.classList.remove('d-none');
+      });
+
+      // Init
+      renderItems();
+    </script>
+  </body>
+</html>
